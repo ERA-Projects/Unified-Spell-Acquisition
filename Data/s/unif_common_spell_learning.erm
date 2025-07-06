@@ -1,0 +1,73 @@
+ZVSE2
+
+!?FU(unif_CreateERMHook);
+
+!!SN:Ex1/1/5008601/(unif_EndOfTurn);                           [trigger on every player end of turn]
+!!SN:Ex1/1/5882231/(unif_DlgSpellBookCtor);                    [trigger on every spellbook open]
+
+
+
+!?FU(OnEveryDay)&999;
+
+!!FU(unif_Player_GetTownsList):Pi^timerOwner^/?(towns:y);
+!!FU(unif_Player_GetHeroesList):Pi^timerOwner^/?(heroes:y);
+
+!!FU(unif_Towns_GiveSpellsToHeroes):P(towns:y)/(heroes:y);
+
+!?FU(unif_Town_GiveSpellsToOwner);
+!#VA(townId:x);
+  !!CA0/x1:O?o;
+  !!FU(unif_Player_GetHeroesList):Po/?(heroes:y);
+  !!FU(NewIntArray):P1/?(towns:y);
+  !!SN:M(towns)/0/x1 M(heroes)/?(heroesNum:y);
+
+  !!if&(heroesNum);
+    !!FU(unif_Towns_GiveSpellsToHeroes):P(towns)/(heroes);
+  !!en;
+
+!?FU(unif_Towns_GiveSpellsToHeroes);
+!#VA(towns:x) (heroes:x);
+
+  !!SN:M(towns)/?(townsNum:y) M(heroes)/?(heroesNum:y);
+  !!if&(townsNum)/(heroesNum);
+    !!UN:C(GAME_MANAGER)/(UNC_UINT32)/?(game:y); 
+    !!UN:C(game)/136724/(UNC_UINT32)/?(itemId:y); 
+    !!re j/0/(townsNum)/1/-1;
+      !!SN:M(towns)/j/?(townId:y);
+      !!VR(town:y):S(townId) *360 +(itemId);
+      !!re i/0/(heroesNum)/1/-1;
+        !!SN:M(heroes)/i/?(heroId:y);
+        !!HE(heroId):Z?(hero:y);
+        !!SN:E6022192/(CALLCONV_THISCALL)/(town)/(hero:y); 
+      !!en;
+    !!en;
+  !!en;
+
+!?FU(OnTownMouseClick)&999/i^mouse_action^=(MOUSE_LMB_PRESSED)/i^mouse_item^=>0/i^mouse_item^<=4;
+!!FU(unif_Player_GetTownsList):Pi^timerOwner^/?(towns:y);
+!!FU(unif_Player_GetHeroesList):Pi^timerOwner^/?(heroes:y);
+
+!!FU(unif_Towns_GiveSpellsToHeroes):P(towns:y)/(heroes:y);
+
+!?FU(OnAfterBuildTownBuilding)&999;/i^timerIsHuman^;
+!!if&x2>=0/x2<=4; //Mage Guild
+  !!FU(unif_Town_GiveSpellsToOwner):Px1;
+!!en;
+
+!?FU(unif_EndOfTurn)&999;
+!!FU(unif_Player_GetTownsList):Pi^timerOwner^/?(towns:y);
+!!FU(unif_Player_GetHeroesList):Pi^timerOwner^/?(heroes:y);
+
+!!FU(unif_Towns_GiveSpellsToHeroes):P(towns:y)/(heroes:y);
+
+!?FU(unif_DlgSpellBookCtor);
+!!UN:C6835096/4/?(heroId:y);
+!!HE(heroId:y):O?o;
+!!if&o<>(NO_OWNER);
+  !!OW:Io/?(isAi:y);
+  !!if&(isAi)=(FALSE);
+    !!FU(unif_Player_GetTownsList):Po/?(towns:y);
+    !!FU(unif_Player_GetHeroesList):Po/?(heroes:y);
+    !!FU(unif_Towns_GiveSpellsToHeroes):P(towns:y)/(heroes:y);
+  !!en;
+!!en;
